@@ -1,6 +1,8 @@
 import { expect } from "chai"
 import { network } from "hardhat"
-import { Identity, Group, generateProof } from "@semaphore-protocol/core"
+import { Identity } from "@semaphore-protocol/identity"
+import { Group } from "@semaphore-protocol/group"
+import { generateProof } from "@semaphore-protocol/proof"
 
 const { ethers } = await network.create()
 

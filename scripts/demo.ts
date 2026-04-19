@@ -1,6 +1,6 @@
-import { Identity } from "@semaphore-protocol/core"
-import { Group } from "@semaphore-protocol/core"
-import { generateProof } from "@semaphore-protocol/core"
+import { Identity } from "@semaphore-protocol/identity"
+import { Group } from "@semaphore-protocol/group"
+import { generateProof } from "@semaphore-protocol/proof"
 
 async function main() {
   console.log("--- Proof of Human Demo ---\n")
