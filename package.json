@@ -25,5 +25,8 @@
     "hardhat": "^3.4.0",
     "mocha": "^11.7.5",
     "typescript": "~5.8.0"
+  },
+  "dependencies": {
+    "@semaphore-protocol/core": "^4.14.2"
   }
 }
