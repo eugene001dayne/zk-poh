@@ -18,6 +18,12 @@ async function main() {
   const poh = await PoH.deploy(await semaphore.getAddress(), groupId)
   await poh.waitForDeployment()
   console.log("ProofOfHuman deployed to:", await poh.getAddress())
+
+  // Deploy SimpleVoting
+  const Voting = await ethers.getContractFactory("SimpleVoting")
+  const voting = await Voting.deploy(await poh.getAddress())
+  await voting.waitForDeployment()
+  console.log("SimpleVoting deployed to:", await voting.getAddress())
 }
 
 main().catch(console.error)
