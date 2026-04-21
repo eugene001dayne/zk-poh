@@ -1,171 +1,166 @@
-# Proof of Human: The Problem & The Solution
-### Document 00 — Foundation Spec
-*Version 1.0 — Living Document*
+# zk-poh
 
-> **Author:** Eugene Dayne Mawuli ([@eugene001dayne](https://github.com/eugene001dayne))  
-> **Status:** Active Development — v0.1  
-> **License:** MIT
----
+**Zero-Knowledge Proof of Human**
 
-## The Problem
+Prove you are a unique human. Vote anonymously. No name, no ID, pure cryptography.
 
-Every day, people create thousands of fake identities to cheat systems that were built for real humans.
-
-They farm airdrops. They manipulate DAO votes. They drain quadratic funding pools that were meant to support public goods. They run bot armies that fake community sentiment.
-
-This is called a **Sybil attack** — one entity pretending to be many.
-
-The current solutions are broken in one of two ways:
-
-- **Too invasive** — they ask for your passport, your phone number, your face scan. You prove you're human by giving up your privacy.
-- **Too weak** — they ask for a Twitter account or an ETH balance. Both can be bought, farmed, or faked.
-
-Nobody has solved the middle ground: *prove you are a unique human, without revealing who you are.*
+Live on Sepolia testnet. Open source. Built on Semaphore V4.
 
 ---
 
-## What We Are Building
+## What This Is
 
-We are not building a global identity system.
-We are not building a biometric database.
-We are not building another "connect your social media" verification tool.
+zk-poh is a system that lets a user prove they are a unique human without revealing who they are. It uses zero-knowledge proofs to prevent Sybil attacks — one entity creating many fake identities to manipulate votes, airdrops, or governance.
 
-We are building the **documentation, standards, and circuit templates** that make zero-knowledge proof of humanity accessible to any developer — so they can build those things, correctly, on top of a solid foundation.
-
-Think of it this way: we are writing the manual for a lock that already exists, so that builders stop installing it upside down.
+No KYC. No biometrics. No phone number. The math enforces the rules.
 
 ---
 
-## The Core Concepts
+## Live Demo
 
-### 1. The Commitment
+Contracts are deployed on Sepolia testnet:
 
-A trusted issuer — Gitcoin Passport, Proof of Humanity, a university, a government, anyone trusted — verifies that you are a real human. They give you a cryptographic credential: a **commitment**.
+| Contract | Address |
+|---|---|
+| ProofOfHuman | [`0x12F957c0FAA1b56745a663eFc4f351EC49f7F5C5`](https://sepolia.etherscan.io/address/0x12F957c0FAA1b56745a663eFc4f351EC49f7F5C5) |
+| SimpleVoting | [`0x06bEE821216e16fd07e61033b55AA073ca7408B6`](https://sepolia.etherscan.io/address/0x06bEE821216e16fd07e61033b55AA073ca7408B6) |
+| Semaphore V4 (Ethereum Foundation) | [`0x8A1fd199516489B0Fb7153EB5f075cDAC83c693D`](https://sepolia.etherscan.io/address/0x8A1fd199516489B0Fb7153EB5f075cDAC83c693D) |
 
-This commitment contains no name. No birthday. No address. It simply says: *"this person is on the verified list."*
+To try it yourself: clone the repo, run the frontend locally, connect MetaMask on Sepolia, and vote.
 
-You hold this commitment privately. Nobody else can see it.
+---
 
-### 2. The Nullifier
+## How It Works
 
-Every time you interact with an application — a DAO vote, an airdrop, a funding round — your credential generates a unique code called a **nullifier**.
+**1. Identity** — A ZK identity is generated in your browser. The private key never leaves your device.
 
-The nullifier is deterministic:
+**2. Registration** — Your cryptographic commitment is registered on-chain. No name, no address — just a number that proves membership.
+
+**3. Proof** — When you vote, a zero-knowledge proof is generated locally. It proves you are a registered human without revealing which one.
+
+**4. Verification** — The proof is verified on-chain by the Ethereum Foundation's Semaphore contract. If valid and nullifier unused: vote counted.
+
+**5. Nullifier** — Every vote produces a unique nullifier. If you try to vote twice, the duplicate nullifier is caught. Your identity is never revealed — just the number that says "this slot is taken."
+
+---
+
+## Project Structure
 
 ```
-same credential + same app = same nullifier code, always
-same credential + different app = completely different code
-```
-
-This means:
-- Nobody can link your activity across different apps
-- But if you try to claim the same airdrop twice, the system sees the same nullifier appear twice and rejects it
-
-You are caught — without anyone knowing who you are.
-
-### 3. The Circuit
-
-A **circuit** is a math machine with rules baked in. You feed it your secret credential and the app ID. It checks:
-
-- Is this credential genuinely in the verified set?
-- Is this the correct nullifier for this app?
-
-If both checks pass, it outputs a small **proof** — a piece of cryptographic data that says *"the rules were satisfied"* — without revealing your credential or your identity.
-
-The proof is what goes on the blockchain. Not you.
-
-### 4. The Verifier Contract
-
-A lightweight smart contract on-chain with exactly two jobs:
-
-1. Is this proof valid? (Did it come from a real circuit run?)
-2. Has this nullifier been used before in this app?
-
-If both checks pass: the action is allowed.
-The nullifier is recorded. Forever. Publicly. As a code like `0x7f3a...ef12` — no name attached.
-
----
-
-## The Full Flow
-
-```
-You
-  │
-  ▼
-[Issuer] — verifies you're human → gives you a Commitment
-  │
-  ▼
-[Circuit] — takes your Commitment + App ID
-          → checks you're in the verified set
-          → outputs: Proof + Nullifier
-  │
-  ▼
-[Verifier Contract] — checks Proof is valid
-                    — checks Nullifier hasn't been used
-  │
-  ▼
-✅ Action allowed. You're in. Anonymously.
+zk-poh/
+├── contracts/
+│   ├── ProofOfHuman.sol      ← Main contract
+│   ├── SimpleVoting.sol      ← Reference voting implementation
+│   └── MockSemaphore.sol     ← For testing
+├── frontend/
+│   └── src/
+│       └── App.jsx           ← React frontend
+├── scripts/
+│   ├── deploy.ts             ← Deployment script
+│   ├── create-proposal.ts    ← Create a proposal on-chain
+│   └── interact.ts           ← Manual interaction demo
+├── test/
+│   ├── ProofOfHuman.ts       ← 2 passing tests
+│   └── SimpleVoting.ts       ← 4 passing tests
+└── docs/
+    └── 01-circuit-spec.md    ← Full architecture documentation
 ```
 
 ---
 
-## What This Does Not Solve
+## Setup
 
-Intellectual honesty matters. This system has real limits.
+**Requirements:** Node.js v20+, npm, MetaMask
 
-**It does not stop credential selling.**
-If a real human gets verified and sells their credential to someone else, that buyer has one valid credential. They can use it once per app — the same as the original human would. Our system cannot distinguish intent.
+```bash
+git clone https://github.com/eugene001dayne/zk-poh.git
+cd zk-poh
+npm install --legacy-peer-deps
+```
 
-This is not a flaw in our design. It is a fundamental limit of any cryptographic approach. Even iris-scan systems like Worldcoin face this — people in Argentina, Ghana, and Kenya have been documented selling their biometric scans for cash.
+**Run tests:**
+```bash
+npx hardhat test
+```
 
-What our system does is **raise the cost of attack dramatically**. Instead of one person creating 1,000 fake identities from nothing, an attacker now needs 1,000 real humans to cooperate. That is a different problem — a social and economic one, not a cryptographic one.
+**Run frontend:**
+```bash
+cd frontend
+npm install --legacy-peer-deps
+npm run dev
+```
 
-**It does not stop coordinated real humans.**
-Groups of real people can still collude — donating to each other's projects in quadratic funding rounds, voting as a bloc. These are real attacks. They require social and game-theoretic solutions layered on top of cryptographic ones.
+Open `http://localhost:5173` in Chrome with MetaMask on Sepolia.
 
----
+**Deploy your own instance:**
+```bash
+# Copy .env.example to .env and fill in your values
+cp .env.example .env
 
-## Who This Is For
-
-**DAO founders** who want governance that cannot be manipulated by one person with fifty wallets.
-
-**Airdrop designers** who want tokens to reach real communities, not farming bots.
-
-**Quadratic funding platforms** who want matching pools to reflect genuine human preference, not manufactured consensus.
-
-**Developers** who want to add Sybil resistance to their protocol with a single function call:
-
-```solidity
-verifyProof(nullifier, appId) → true / false
+npx hardhat run scripts/deploy.ts --network sepolia
+npx hardhat run scripts/create-proposal.ts --network sepolia
 ```
 
 ---
 
-## The Landscape
+## Tests
 
-People are trying to solve this. Nobody has fully solved it.
+```
+ProofOfHuman
+  ✔ should add a human and verify their proof
+  ✔ should reject a double submission
 
-| Project | Approach | Weakness |
-|---|---|---|
-| Worldcoin | Iris scan | People sell their scans for cash |
-| Gitcoin Passport | Aggregated social stamps | Gameable, wealth-biased |
-| Proof of Humanity | Video verification | Slow, hard to scale |
-| Semaphore / Zupass | ZK nullifier schemes | Powerful but inaccessible to most developers |
+SimpleVoting
+  ✔ should create a proposal
+  ✔ should allow a verified human to vote yes
+  ✔ should reject a double vote
+  ✔ should count yes and no votes correctly
 
-The technical primitives exist. What does not exist is clear documentation, accessible templates, and a standard that developers can adopt without a PhD in cryptography.
-
-That is the gap. That is what this project fills.
-
----
-
-## What Comes Next
-
-- **Document 01** — The Circuit Spec: how the nullifier scheme works mathematically
-- **Document 02** — The Verifier Contract: a reference Solidity implementation
-- **Document 03** — The SDK: how a developer integrates this in under an hour
-- **Document 04** — The Issuer Interface: how existing identity systems plug in
+6 passing
+```
 
 ---
 
-*This is a living document. It will be updated as the specification matures.*
-*Maintained by the Proof of Human project.*
+## Technical Stack
+
+- **Smart Contracts:** Solidity 0.8.28, Hardhat 3
+- **ZK Protocol:** Semaphore V4 (Ethereum Foundation)
+- **Frontend:** React + Vite + ethers.js v6
+- **Testing:** Mocha + Chai
+- **Network:** Ethereum Sepolia testnet
+
+---
+
+## Documentation
+
+Full architecture documentation in [`docs/01-circuit-spec.md`](docs/01-circuit-spec.md).
+
+Covers the four components (commitment, nullifier, circuit, verifier), the full flow, deployed addresses, test results, security considerations, and integration guide.
+
+---
+
+## What's Next
+
+- [ ] Deploy frontend publicly (Vercel)
+- [ ] Restrict `addHuman` to trusted issuer
+- [ ] Integrate Gitcoin Passport as issuer
+- [ ] Document 02 — The Verifier Contract Reference
+- [ ] Mainnet deployment (after audit)
+
+---
+
+## Built By
+
+**Eugene Dayne Mawuli** — Accra, Ghana
+
+The goal: make zero-knowledge proof of humanity as accessible as WordPress made websites.
+
+---
+
+## License
+
+MIT
+
+---
+
+*Built on [Semaphore](https://semaphore.pse.dev) by the Ethereum Foundation's Privacy & Scaling Explorations team.*
